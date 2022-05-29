@@ -1,0 +1,22 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+	<h3>Recent submissions</h3>
+	{%for i in range(0, len)%}
+		<b>{{wall_data[i][0]}} made a submission: </b>
+		<p>{{wall_data[i][1]}}</p>
+        <b>Result:</b>
+        <p>{{ wall_data[i][2] }}</p>
+	{%endfor%}
+	<br>
+	<b>New submission:</b>
+	<form method="POST" action="/wall" onsubmit="this.submit(); this.reset(); return false;">
+		Author: <input type="text" name="nick" required><br>
+        Code: <textarea name="message" required></textarea><br>
+		<input type="submit" value="Send">
+	</form>
+</body>
+</html>
