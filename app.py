@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for
-from datetime import datetime
 import sqlite3
-import os
 import subprocess
+
+from parse import check_for_keywords
+from compile_run import compile_cpp, run_cpp
+from flask import Flask, render_template, request, redirect
 
 app = Flask('my_first_server')
 DB_NAME = 'messages.db'
@@ -45,46 +46,24 @@ def render_main_page():
 @app.route('/wall', methods=['POST'])
 def response():
 
-    # take data from user, fill the table with it and return the new page
-
     nick = request.form.get("nick")
     message = request.form.get("message")
 
-    code_text = str(message)
-    print(code_text)
-
-    check1, check2 = code_text.find('system'), code_text.find('import os')
-
-    if (check1 != -1 or check2 != -1):
-        print("!!!!!")
+    if check_for_keywords(str(message)):
+        print('System commands are not allowed')
         set_wall_data(nick, message, 'System commands are not allowed')
         return redirect("/", code=302)
 
-    file = open("code.cpp", 'w')
-    file.write(message)
-    file.close()
-
-    process = subprocess.Popen(['g++', 'code.cpp'],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-
-    if (stderr != b''):
-        print(f'Error: {stderr}')
-        set_wall_data(nick, message, stderr)
+    compilation_result = compile_cpp(str(message))
+    if compilation_result != 0:
+        print('Didnt compile, error: ', compilation_result)
+        set_wall_data(nick, message, compilation_result)
         return redirect("/", code=302)
 
-    process = subprocess.Popen(['./a.out'],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
+    output = run_cpp()
 
-    result = str(stdout)[2:-1]
-
-    result = 'no output' if result == '' else result
-
-    set_wall_data(nick, message, result)
-    print(f'Run result: {result}')
+    set_wall_data(nick, message, output)
+    print(f'Run result: {output}')
     return redirect("/", code=302)
 
 @app.route('/')
