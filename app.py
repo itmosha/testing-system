@@ -50,13 +50,11 @@ def response():
     message = request.form.get("message")
 
     if check_for_keywords(str(message)):
-        print('System commands are not allowed')
         set_wall_data(nick, message, 'System commands are not allowed')
         return redirect("/", code=302)
 
     compilation_result = compile_cpp(str(message))
-    if compilation_result != 0:
-        print('Didnt compile, error: ', compilation_result)
+    if compilation_result:
         set_wall_data(nick, message, compilation_result)
         return redirect("/", code=302)
 

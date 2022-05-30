@@ -11,8 +11,10 @@ def compile_cpp(code_text):
     stdout, stderr = process.communicate()
 
     if stderr == b'':
+        print('Compiltaion: compiled without errors')
         return 0
     else:
+        print(f'Compiltaion: compilation error: {str(stderr)[2:-1]}')
         return str(stderr)[2:-1]
 
 def run_cpp():
