@@ -1,6 +1,8 @@
 import sqlite3
 import subprocess
 
+import requests
+
 from parse import check_for_keywords
 from compile_run import compile_cpp, run_cpp
 from flask import Flask, render_template, request, redirect
@@ -49,6 +51,11 @@ def response():
     nick = request.form.get("nick")
     message = request.form.get("message")
 
+    r = requests.get(f'http://localhost:3000/wall?code={message}')
+
+    print(f'message: {r.text}')
+
+    '''
     if check_for_keywords(str(message)):
         set_wall_data(nick, message, 'System commands are not allowed')
         return redirect("/", code=302)
@@ -60,8 +67,11 @@ def response():
 
     output = run_cpp()
 
+
     set_wall_data(nick, message, output)
     print(f'Run result: {output}')
+    '''
+
     return redirect("/", code=302)
 
 @app.route('/')
